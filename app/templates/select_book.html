@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <br>
+                <div class="panel panel-default">
+                    <!-- Default panel contents -->
+                    <div class="panel-heading">书籍信息</div>
+                    <!-- Table -->
+                    <table class="table table-striped">
+                        <th>
+                        <td>书籍编号</td>
+                        <td>书名</td>
+                        <td>类别</td>
+                        <td>作者</td>
+                        <td>出版社</td>
+                        <td>价格</td>
+                        <td>库存量</td>
+                        </th>
+                        <tr>
+                            {#                        {% if table_page %}#}
+                            {% for i in table_page.items %}
+                                <td></td>
+                                <td>{{ i.id }}</td>
+                                <td>《{{ i.name }}》</td>
+                                <td>{{ i.category }}</td>
+                                <td>{{ i.author }}</td>
+                                <td>{{ i.provenance }}</td>
+                                <td>¥{{ i.price }}元/本</td>
+                                <td>{{ i. count }}本</td>
+                                </tr>
+                            {% endfor %}
+                        {#                        {% endif %}#}
+                    </table>
+                </div>
+                {#        {#书籍分页效果#}
+                {#            {% if table_page %}#}
+                <nav aria-label="Page navigation">
+                    <div style="text-align: center;">
+                        <ul class="pagination">
+                            {# 如果有上一页就显示上一页按钮 #}
+                            <li class="{% if not table_page.has_prev %}disabled{% endif %}">
+                                <a href="{% if table_page.has_prev %}{{ url_for('select_book',page=table_page.prev_num) }}{% endif %}"
+                                   aria-label="Next">
+                                    <span aria-hidden="true">&raquo;上一页</span>
+                                </a>
+                            </li>
+
+                            {% for i in table_page.iter_pages(left_edge=2,left_current=2,right_current=2,right_edge=2) %}
+                                {% if i %}
+                                    <li class="{% if i == table_page.page %}active{% endif %}"><a
+                                            href="{{ url_for('select_book',page=i) }}">{{ i }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="disabled"><a href="#">...</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            {#{% if posts.has_next %} {# 如果有下一页就显示下一页按钮 #}
+                            <li class="{% if not table_page.has_next %}disabled{% endif %}">
+                                <a href="{% if table_page.has_next %}{{ url_for('select_book',page=table_page.next_num) }}{% endif %}"
+                                   aria-label="Next">
+                                    <span aria-hidden="true">&raquo;下一页</span>
+                                </a>
+                            </li>
+                            {#{% endif %}#}
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+            {#            {% endif %}#}
+            {#        <div class="col-md-2">#}
+            {#        </div>#}
+            <div class="col-md-3">
+                {% import "bootstrap/wtf.html" as wtf %}
+                {{ form.hidden_tag() }}
+                {{ wtf.quick_form(form) }}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
