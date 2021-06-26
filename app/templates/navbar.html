@@ -16,7 +16,7 @@
                     <span class="sr-only">(current)</span></a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                {% if not request.endpoint in ['admin','select_book'] %}
+                {% if not request.endpoint in ['admin','select_book','look_book'] %}
                     {% if not current_user.is_authenticated %}  {# 判断用户是否登录 #}
 
                         <li class="{% if request.endpoint == 'login' %}active{% endif %}"><a
@@ -27,8 +27,8 @@
                         <li><a href="{{ url_for("logout") }}">注销 <span class="sr-only">(current)</span></a></li>
                     {% endif %}
                 {% else %}
-                    <li><a href="#">浏览书籍信息</a></li>
-                    <li><a href="{{ url_for('select_book') }}">书籍查询</a></li>
+                    <li><a href="{{ url_for('look_book',page=0) }}">浏览书籍信息</a></li>
+                    <li><a href="{{ url_for('select_book',page=0) }}">书籍查询</a></li>
                     <li><a href="#">修改书籍信息</a></li>
                     <li><a href="#">删除书籍</a></li>
 
