@@ -42,7 +42,7 @@
                         <ul class="pagination">
                             {# 如果有上一页就显示上一页按钮 #}
                             <li class="{% if not table_page.has_prev %}disabled{% endif %}">
-                                <a href="{% if table_page.has_prev %}{{ url_for('select_book',page=table_page.prev_num) }}{% endif %}"
+                                <a {% if table_page.has_prev %}href="{{ url_for('select_book',page=table_page.prev_num) }}"{% endif %}
                                    aria-label="Next">
                                     <span aria-hidden="true">&raquo;上一页</span>
                                 </a>
@@ -59,8 +59,7 @@
                             {% endfor %}
                             {#{% if posts.has_next %} {# 如果有下一页就显示下一页按钮 #}
                             <li class="{% if not table_page.has_next %}disabled{% endif %}">
-                                <a href="{% if table_page.has_next %}{{ url_for('select_book',page=table_page.next_num) }}{% endif %}"
-                                   aria-label="Next">
+                                <a {% if table_page.has_next %}href="{{ url_for('select_book',page=table_page.next_num) }}"{% endif %}aria-label="Next">
                                     <span aria-hidden="true">&raquo;下一页</span>
                                 </a>
                             </li>
@@ -72,10 +71,49 @@
             {#            {% endif %}#}
             {#        <div class="col-md-2">#}
             {#        </div>#}
-            <div class="col-md-3">
+            <div class="col-md-4">
+                {% for message in get_flashed_messages() %}
+                    <div class="alert alert-info">{{ message }}</div>
+                {% endfor %}
                 {% import "bootstrap/wtf.html" as wtf %}
-                {{ form.hidden_tag() }}
-                {{ wtf.quick_form(form) }}
+                {% if form %}
+                    <form method="post">
+                        {#                    {{ form.csrf_token }}#}
+                        {#                        {{ form.hidden_tag() }}#}
+                        {{ wtf.quick_form(form) }}
+                    </form>
+                {% endif %}
+                <br>
+                {% if alter_form %}
+                    <form method="post">
+                        {#                    {{ form.csrf_token }}#}
+                        <div class="row">
+                            <div class="col-lg-5">
+                                {{ wtf.form_field(alter_form.id) }}
+                                {{ wtf.form_field(alter_form.name) }}
+                                {{ wtf.form_field(alter_form.category) }}
+                                {{ wtf.form_field(alter_form.provenance) }}
+                                {{ wtf.form_field(alter_form.bool) }}
+                                {{ wtf.form_field(alter_form.submit) }}
+                            </div>
+                            <div class="col-md-1"></div>
+                            <div class="col-md-5">
+                                {{ wtf.form_field(alter_form.author) }}
+                                {{ wtf.form_field(alter_form.price) }}
+                                {{ wtf.form_field(alter_form.num) }}
+                            </div>
+                        </div>
+                    </form>
+                {% endif %}
+                {% if remove_form %}
+                    <form method="post">
+                        {#                    {{ form.csrf_token }}#}
+                        {{ wtf.form_field(remove_form.id) }}
+                        {{ wtf.form_field(remove_form.submit) }}
+                    </form>
+                {% endif %}
+                <br>
+
             </div>
         </div>
     </div>

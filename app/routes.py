@@ -1,17 +1,19 @@
 from flask import render_template, flash, redirect, url_for, session, request
 
 from app import app, db
-from app.forms import RegisterForm, LoginForm, RetrievePasswordForm, SelectBookForm, AddBookForm
+from app.forms import RegisterForm, LoginForm, RetrievePasswordForm, SelectBookForm, AddBookForm,DelBookForm
 from app.models import User, Book
 # from app.func import add_user, search_user, is_pwd_true, search_email, add_book
 from flask_login import login_user, login_required, logout_user, current_user
 
 
-@app.route('/')
-def home():
-    if current_user.is_authenticated:
-        return render_template('index.html', name=session.get('username'))
-    return render_template('index.html')
+@app.route('/<int:page>')
+@login_required
+def home(page):
+    if not page or page < 1:
+        page = 1
+    table_paginate = Book.query.order_by(Book.id).paginate(page, per_page=10, error_out=True)
+    return render_template('index.html',name=current_user.username,table_page=table_paginate)
 
 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -44,7 +46,7 @@ def register():
         else:
             try:
                 password = form.password.data
-                user = User(username=username, email=form.email.data, password=password)
+                user = User(username=username, password=password, email=form.email.data, )
                 db.session.add(user)
                 db.session.commit()
                 flash("注册成功", 'info')
@@ -80,13 +82,76 @@ def select_book(page):
     if not page or page < 1:
         page = 1
     form = SelectBookForm()
+    alter_form = AddBookForm()
+    remove_form = DelBookForm()
+    # 分页器对象
+    table_paginate = Book.query.order_by(Book.id).paginate(page, per_page=10, error_out=True)
     if form.validate_on_submit():
+        print('debug:点击1')
         print(form.select.data)
-        return redirect(url_for('select_book', page=1))
-        # 分页器对象
-    table_paginate = Book.query.order_by(Book.id).paginate(page, per_page=10,
-                                                           error_out=True)
-
+        number = form.select.data
+        text = form.text.data
+        try:
+            table_paginate = selectbook(number, text, page)
+        except Exception as e:
+            print(e)
+            flash("查询失败,请重试!", category='info')
+        if form.operatin_select.data == 2:
+            print('debug:修改操作，获取值:', form.operatin_select.data)
+            return render_template('select_book.html', alter_form=alter_form, table_page=table_paginate)
+        elif form.operatin_select.data == 3:
+            print('debug:修改操作，获取值:', form.operatin_select.data)
+            remove_form = AddBookForm()
+            return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
+    # 修改书籍信息
+    if alter_form.validate_on_submit():
+        print('debug:测试点击2')
+        print(alter_form.bool.data)
+        if alter_form.bool.data:
+            book_id = alter_form.id.data
+            book_name = alter_form.name.data
+            book_category = alter_form.category.data
+            book_author = alter_form.author.data
+            book_provenance = alter_form.provenance.data
+            book_price = alter_form.price.data
+            book_num = alter_form.num.data
+            # 判断要修改的书籍是否存在
+            book = Book.query.filter_by(id=book_id).first()
+            if book:
+                try:
+                    book.name = book_name
+                    book.category = book_category
+                    book.author = book_author
+                    book.provenance = book_provenance
+                    book.price = book_price
+                    book.count = book_num
+                    db.session.commit()
+                    flash('书籍修改成功！', category='info')
+                    print('修改成功')
+                except Exception as e:
+                    db.session.rollback()
+                    print(e)
+                    print('修改失败！')
+                    flash("书籍修改失败，请重试!", category='info')
+                    # return render_template('select_book.html', alter_form=alter_form, table_page=table_paginate)
+            else:
+                flash("要修改的书籍不存在！",category="info")
+        else:
+            flash("请确认要修改的信息！")
+        return render_template('select_book.html', alter_form=alter_form, table_page=table_paginate)
+    if remove_form.validate_on_submit():
+        print('测试删除3')
+        id = remove_form.id.data
+        book = Book.query.filter_by(id=id).first()
+        if book:
+            Book.query.filter_by(id=id).delete()
+            db.session.commit()
+            flash("删除成功！",category='info')
+            # return redirect(url_for('select_book',page=page))
+            return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
+        else:
+            flash("输入的书籍编号不存在!",category='info')
+        return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
     # print(request.endpoint)
     return render_template('select_book.html', form=form, table_page=table_paginate)
 
@@ -136,6 +201,43 @@ def look_book(page):
     return render_template('look_book.html', table=table, table_page=table_paginate, form=form)
 
 
+# @app.route('/admin/alterbook/<int:page>')
+# def alter_book(page):
+#     if not page or page < 1:
+#         page = 1
+#     table = Book.query.all()
+#     form = AddBookForm()
+#     # 分页器对象
+#     table_paginate = Book.query.order_by(Book.id).paginate(page, per_page=10,
+#                                                            error_out=True)  # page代表那一页。每页显示2个，超出页数显示空列表
+#     if request.method == 'POST':
+#         if form.validate_on_submit:
+#             print('debug')
+#             # 获取表单数据
+#             book_id = form.id.data
+#             book_name = form.name.data
+#             book_category = form.category.data
+#             book_author = form.author.data
+#             book_provenance = form.provenance.data
+#             book_price = form.price.data
+#             book_num = form.num.data
+#             print(book_id, book_name, book_category, book_author, book_provenance, book_price, book_num)
+#             obj_book_id = Book.query.filter_by(id=book_id).first()
+#             if obj_book_id:  # 判断书籍编号是否存在，书籍编号不可重复
+#                 if obj_book_id.name == book_name and obj_book_id.category == book_category and obj_book_id.author == book_author:
+#                     if obj_book_id.provenance == book_provenance and obj_book_id.price == book_price:
+#                         obj_book_id.count += int(book_num)
+#                         db.session.commit()
+#                         flash("添加成功！", category='info')
+#                 else:
+#                     flash("添加失败,书籍编号已存在!")
+#             else:
+#                 add_book(book_id=book_id, book_name=book_name, book_category=book_category,
+#                          book_author=book_author,
+#                          book_provenance=book_provenance, book_price=book_price, book_num=book_num)
+#     return render_template('alter_book.html', table=table, table_page=table_paginate, form=form)
+
+
 @app.route('/logout/')
 def logout():
     logout_user()
@@ -158,3 +260,33 @@ def add_book(book_id, book_name, book_category, book_author, book_provenance, bo
         print('添加失败！')
         flash("书籍添加失败!", category='info')
         return redirect(url_for('look_book', page=1))
+
+
+def selectbook(number, text, page):
+    if number == 1:
+        table = Book.query.filter_by(id=text).order_by(Book.id)
+        count = table.count()
+        print('debug数量', count)
+        table_paginate = table.paginate(page, per_page=10, error_out=True)
+    elif number == 2:
+        table = Book.query.filter_by(name=text).order_by(Book.id)
+        count = table.count()
+        print('debug数量', count)
+        table_paginate = table.paginate(page, per_page=10, error_out=True)
+    elif number == 3:
+        table = Book.query.filter_by(category=text).order_by(Book.id)
+        count = table.count()
+        print('debug数量', count)
+        table_paginate = table.paginate(page, per_page=10, error_out=True)
+    elif number == 4:
+        table = Book.query.filter_by(author=text).order_by(Book.id)
+        count = table.count()
+        print('debug数量', count)
+        table_paginate = table.paginate(page, per_page=10, error_out=True)
+    else:
+        table = Book.query.filter_by(provenance=text).order_by(Book.id)
+        count = table.count()
+        print('debug数量', count)
+        table_paginate = table.paginate(page, per_page=10, error_out=True)
+    flash(f"查询成功,查询到{count}条结果！", category='info')
+    return table_paginate

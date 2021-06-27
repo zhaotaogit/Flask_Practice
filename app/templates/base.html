@@ -16,7 +16,7 @@
 
 {% block content %}
     <div class="container">
-    {% if not request.endpoint in ['look_book'] %}
+    {% if not request.endpoint in ['look_book','select_book'] %}
         <div class="row">
             <div class="col-md-6">
                 {% for message in get_flashed_messages() %}

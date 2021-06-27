@@ -6,17 +6,17 @@
                     data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
 
             </button>
-            <a class="navbar-brand" href="{{ url_for('home') }}"> 氧气书屋 </a>
+            <a class="navbar-brand" href="{{ url_for('home',page=0) }}"> 氧气书屋 </a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li class="{% if request.endpoint == 'home' %}active{% endif %}"><a href="{{ url_for("home") }}">首页
+                <li class="{% if request.endpoint == 'home' %}active{% endif %}"><a href="{{ url_for("home",page=0) }}">首页
                     <span class="sr-only">(current)</span></a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                {% if not request.endpoint in ['admin','select_book','look_book'] %}
+                {% if not request.endpoint in ['admin','select_book','look_book','alter_book'] %}
                     {% if not current_user.is_authenticated %}  {# 判断用户是否登录 #}
 
                         <li class="{% if request.endpoint == 'login' %}active{% endif %}"><a
@@ -24,13 +24,15 @@
                         <li class="{% if request.endpoint == 'register' %}active{% endif %}"><a
                                 href="{{ url_for("register") }}">注册</a></li>
                     {% else %}
+                        <li><a href="#">个人中心 <span class="sr-only">(current)</span></a></li>
                         <li><a href="{{ url_for("logout") }}">注销 <span class="sr-only">(current)</span></a></li>
                     {% endif %}
                 {% else %}
-                    <li><a href="{{ url_for('look_book',page=0) }}">浏览书籍信息</a></li>
-                    <li><a href="{{ url_for('select_book',page=0) }}">书籍查询</a></li>
-                    <li><a href="#">修改书籍信息</a></li>
-                    <li><a href="#">删除书籍</a></li>
+                    <li><a href="{{ url_for('look_book',page=0) }}">浏览与新增书籍</a></li>
+                    <li><a href="{{ url_for('select_book',page=0) }}">书籍查询与修改</a></li>
+{#                    <li><a href="{{ url_for('alter_book',page=0) }}">修改书籍信息</a></li>#}
+                    <li><a href="#">个人中心</a></li>
+
 
 
                 {% endif %}

@@ -26,6 +26,16 @@ class RetrievePasswordForm(FlaskForm):
 
 
 class SelectBookForm(FlaskForm):
+    operatin_select = SelectField(
+        label='选择操作的',
+        validators=[DataRequired('请选择标签')],
+        render_kw={
+            'class': 'form-control'
+        },
+        choices=[(1, '查询'), (2, '修改'), (3, '删除')],
+        default=1,
+        coerce=int
+    )
     select = SelectField(
         label='选择查询的类别',
         validators=[DataRequired('请选择标签')],
@@ -36,6 +46,7 @@ class SelectBookForm(FlaskForm):
         default=1,
         coerce=int
     )
+
     text = TextField('要查寻的内容', validators=[DataRequired()])
 
     submit = SubmitField('确定')
@@ -51,4 +62,11 @@ class AddBookForm(FlaskForm):
     provenance = StringField("出版社", validators=[DataRequired()])
     price = StringField("价格", validators=[DataRequired()])
     num = StringField("数量", validators=[DataRequired()])
-    submit = SubmitField('确定添加')
+    bool = BooleanField("已确认")
+    submit = SubmitField('确定')
+
+
+class DelBookForm(FlaskForm):
+    id = StringField("书籍编号", validators=[DataRequired()])
+    submit = SubmitField('确定')
+

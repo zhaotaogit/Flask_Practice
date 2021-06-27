@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block page_content %}
+    <div class="container">
     <div class="row">
         {#        <div class="col-md-1">#}
         {#        </div>#}
@@ -40,7 +41,8 @@
                     <ul class="pagination">
                         {# 如果有上一页就显示上一页按钮 #}
                         <li class="{% if not table_page.has_prev %}disabled{% endif %}">
-                            <a href="{% if table_page.has_prev %}{{ url_for('look_book',page=table_page.prev_num) }}{% endif %}"
+                            <a href="
+                                    {% if table_page.has_prev %}{{ url_for('look_book',page=table_page.prev_num) }}{% endif %}"
                                aria-label="Previous">
                                 <span aria-hidden="true">&laquo;上一页</span>
                             </a>
@@ -58,7 +60,8 @@
                         {% endfor %}
                         {#{% if posts.has_next %} {# 如果有下一页就显示下一页按钮 #}
                         <li class="{% if not table_page.has_next %}disabled{% endif %}">
-                            <a href="{% if table_page.has_next %}{{ url_for('look_book',page=table_page.next_num) }}{% endif %}"
+                            <a href="
+                                    {% if table_page.has_next %}{{ url_for('look_book',page=table_page.next_num) }}{% endif %}"
                                aria-label="Next">
                                 <span aria-hidden="true">&raquo;下一页</span>
                             </a>
@@ -71,33 +74,33 @@
 
         <form class="form form-horizontal" method="post" role="form">
             <div class="col-md-4">
-            <div class="container-fluid">
-                <h3><strong>添加书籍</strong></h3>
-                <div class="col-md-5">
-                    {% import "bootstrap/wtf.html" as wtf %}
-                    {{ wtf.form_field(form.id) }}
-                    {{ wtf.form_field(form.name) }}
-                    {{ wtf.form_field(form.category) }}
-                    {{ wtf.form_field(form.provenance) }}
-                    {{ wtf.form_field(form.submit) }}
-                </div>
-                {#            {{ form.id.label }}{{ form.id(class="form-control") }}#}
-                {#            {{ form.name.label }}{{ form.name(class="form-control") }}#}
-                {#            {{ form.category.label }}{{ form.name(class="form-control") }}#}
-                {#            {{ form.provenance.label }}{{ form.category(class="form-control") }}#}
-                {#
+                <div class="container-fluid">
+                    <h3><strong>添加书籍</strong></h3>
+                    <div class="col-md-5">
+                        {% import "bootstrap/wtf.html" as wtf %}
+                        {{ wtf.form_field(form.id) }}
+                        {{ wtf.form_field(form.name) }}
+                        {{ wtf.form_field(form.category) }}
+                        {{ wtf.form_field(form.provenance) }}
+                        {{ wtf.form_field(form.submit) }}
+                    </div>
+                    {#            {{ form.id.label }}{{ form.id(class="form-control") }}#}
+                    {#            {{ form.name.label }}{{ form.name(class="form-control") }}#}
+                    {#            {{ form.category.label }}{{ form.name(class="form-control") }}#}
+                    {#            {{ form.provenance.label }}{{ form.category(class="form-control") }}#}
+                    {#
 {#                {{ wtf.form_field(form.id) }}#}
-                {#                {{ wtf.form_field(form.name) }}#}
-                {#                {{ wtf.form_field(form.category) }}#}
-                {#            <div class="col-md-1">#}
-                {#            </div>#}
-            <div class="col-md-1"></div>
-                <div class="col-md-5">
-                    {{ wtf.form_field(form.author) }}
-                    {{ wtf.form_field(form.price) }}
-                    {{ wtf.form_field(form.num) }}
+                    {#                {{ wtf.form_field(form.name) }}#}
+                    {#                {{ wtf.form_field(form.category) }}#}
+                    {#            <div class="col-md-1">#}
+                    {#            </div>#}
+                    <div class="col-md-1"></div>
+                    <div class="col-md-5">
+                        {{ wtf.form_field(form.author) }}
+                        {{ wtf.form_field(form.price) }}
+                        {{ wtf.form_field(form.num) }}
+                    </div>
                 </div>
-            </div>
                 {% for message in get_flashed_messages() %}
                     <div class="alert alert-info">{{ message }}</div>
                 {% endfor %}
@@ -111,6 +114,7 @@
         {#            {{ wtf.form_field(form.num) }}#}
 
 
+    </div>
     </div>
 {% endblock %}
 
