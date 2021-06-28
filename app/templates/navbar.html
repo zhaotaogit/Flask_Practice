@@ -6,35 +6,75 @@
                     data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
 
             </button>
-            <a class="navbar-brand" href="{{ url_for('home',page=0) }}"> 氧气书屋 </a>
+            <a class="navbar-brand" href="{{ url_for('home') }}"> 氧气书屋 </a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li class="{% if request.endpoint == 'home' %}active{% endif %}"><a href="{{ url_for("home",page=0) }}">首页
-                    <span class="sr-only">(current)</span></a></li>
+                <li class="{% if request.endpoint == 'home' %}active{% endif %}"><a href="{{ url_for("home") }}">首页</a>
+                </li>
+                <li class="{% if request.endpoint == 'bookinfo' %}active{% endif %}"><a
+                        href="{{ url_for("bookinfo",page=1) }}">浏览书籍</a></li>
+                <li class="{% if request.endpoint == 'buybook' %}active{% endif %}"><a href="{{ url_for("buybook") }}">购买书籍</a>
+                </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                {% if not request.endpoint in ['admin','select_book','look_book','alter_book'] %}
-                    {% if not current_user.is_authenticated %}  {# 判断用户是否登录 #}
+                {#                {% if not request.endpoint in ['admin','select_book','look_book','alter_book'] %}#}
+{#                {% if not current_user.is_authenticated %}  {# 判断用户是否登录 #}
+{##}
+{#                    <li class="{% if request.endpoint == 'login' %}active{% endif %}"><a#}
+{#                            href="{{ url_for("login") }}">登录</a></li>#}
+{#                    <li class="{% if request.endpoint == 'register' %}active{% endif %}"><a#}
+{#                            href="{{ url_for("register") }}">注册</a></li>#}
+{#                {% else %}#}
+{#                    <li class="{% if request.endpoint == 'look_book' %}active{% endif %}"><a#}
+{#                            href="{{ url_for('look_book',page=0) }}">新增书籍</a></li>#}
+{#                    <li class="{% if request.endpoint == 'select_book' %}active{% endif %}"><a#}
+{#                            href="{{ url_for('select_book',page=0) }}">书籍查询与修改</a></li>#}
+{#                    <li><a href="#">{{ current_user.username }}<span class="sr-only">(current)</span></a></li>#}
+{#                    <li class="{% if request.endpoint == 'logout' %}active{% endif %}"><a#}
+{#                            href="{{ url_for("logout") }}">注销 <span class="sr-only">(current)</span></a></li>#}
+                    {#                    <div class="dropdown">#}
+{#                    <li class="dropdown">#}
+{#                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"#}
+{#                           aria-expanded="false">{{ current_user.username }} <span class="caret"></span></a>#}
+{#                        <ul class="dropdown-menu">#}
+{#                            <li><a href="#">个人中心</a></li>#}
+{#                            <li><a href="#">新增书籍</a></li>#}
+{#                            <li><a href="#">书籍查询与修改</a></li>#}
+{#                        </ul>#}
+{#                    </li>#}
+                    {#                    </div>#}
+{#                {% endif %}#}
+                {% if not current_user.is_authenticated %}  {# 判断用户是否登录 #}
 
-                        <li class="{% if request.endpoint == 'login' %}active{% endif %}"><a
-                                href="{{ url_for("login") }}">登录</a></li>
-                        <li class="{% if request.endpoint == 'register' %}active{% endif %}"><a
-                                href="{{ url_for("register") }}">注册</a></li>
-                    {% else %}
-                        <li><a href="#">个人中心 <span class="sr-only">(current)</span></a></li>
-                        <li><a href="{{ url_for("logout") }}">注销 <span class="sr-only">(current)</span></a></li>
-                    {% endif %}
+                    <li class="{% if request.endpoint == 'login' %}active{% endif %}"><a
+                            href="{{ url_for("login") }}">登录</a></li>
+                    <li class="{% if request.endpoint == 'register' %}active{% endif %}"><a
+                            href="{{ url_for("register") }}">注册</a></li>
                 {% else %}
-                    <li><a href="{{ url_for('look_book',page=0) }}">浏览与新增书籍</a></li>
-                    <li><a href="{{ url_for('select_book',page=0) }}">书籍查询与修改</a></li>
-{#                    <li><a href="{{ url_for('alter_book',page=0) }}">修改书籍信息</a></li>#}
-                    <li><a href="#">个人中心</a></li>
+{#                    <li class="{% if request.endpoint == 'look_book' %}active{% endif %}"><a#}
+{#                            href="{{ url_for('look_book',page=0) }}">新增书籍</a></li>#}
+{#                    <li class="{% if request.endpoint == 'select_book' %}active{% endif %}"><a#}
+{#                            href="{{ url_for('select_book',page=0) }}">书籍查询与修改</a></li>#}
+{#                    <li><a href="#">{{ current_user.username }}<span class="sr-only">(current)</span></a></li>#}
 
-
-
+                    {#                    <div class="dropdown">#}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">{{ current_user.username }} <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('personal_center') }}">个人中心</a></li>
+                            <li class="{% if request.endpoint == 'look_book' %}active{% endif %}"><a
+                            href="{{ url_for('look_book',page=0) }}">新增书籍</a></li>
+                    <li class="{% if request.endpoint == 'select_book' %}active{% endif %}"><a
+                            href="{{ url_for('select_book',page=0) }}">书籍查询与修改</a></li>
+                        </ul>
+                    <li class="{% if request.endpoint == 'logout' %}active{% endif %}"><a
+                            href="{{ url_for("logout") }}">注销 <span class="sr-only">(current)</span></a></li>
+                    </li>
+                    {#                    </div>#}
                 {% endif %}
             </ul>
         </div><!-- /.navbar-collapse -->

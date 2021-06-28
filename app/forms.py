@@ -68,5 +68,7 @@ class AddBookForm(FlaskForm):
 
 class DelBookForm(FlaskForm):
     id = StringField("书籍编号", validators=[DataRequired()])
+    bool = BooleanField("已确认")
     submit = SubmitField('确定')
+
 

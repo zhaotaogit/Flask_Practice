@@ -1,19 +1,69 @@
 from flask import render_template, flash, redirect, url_for, session, request
 
 from app import app, db
-from app.forms import RegisterForm, LoginForm, RetrievePasswordForm, SelectBookForm, AddBookForm,DelBookForm
+from app.forms import RegisterForm, LoginForm, RetrievePasswordForm, SelectBookForm, AddBookForm, DelBookForm
 from app.models import User, Book
 # from app.func import add_user, search_user, is_pwd_true, search_email, add_book
 from flask_login import login_user, login_required, logout_user, current_user
 
 
-@app.route('/<int:page>')
+@app.route('/')
 @login_required
-def home(page):
+def home():
+    print(current_user.username)
+    # if not page or page < 1:
+    #     page = 1
+    # table_paginate = Book.query.order_by(Book.id).paginate(page, per_page=10, error_out=True)
+    return render_template('index.html', name=current_user.username, title='首页')
+
+@app.route('/personal_center')
+@login_required
+def personal_center():
+    return render_template('personal_center.html')
+
+
+@app.route('/bookinfo/<int:page>')
+@login_required
+def bookinfo(page):
     if not page or page < 1:
         page = 1
     table_paginate = Book.query.order_by(Book.id).paginate(page, per_page=10, error_out=True)
-    return render_template('index.html',name=current_user.username,table_page=table_paginate)
+    return render_template('bookinfo.html', table_page=table_paginate)
+
+
+@app.route('/buybook/', methods=['GET', 'POST'])
+@login_required
+def buybook():
+    if request.method == 'GET':
+        book_id = request.args.get('book_id')
+        if not book_id:
+            return render_template('buybook.html')
+        book = Book.query.filter_by(id=book_id).first()
+        return render_template('buybook.html',book=book)
+    if request.method == 'POST':
+        form_data = request.form.to_dict()
+        num = form_data.get('num')
+        print(form_data)
+        print(num)
+        book_id = form_data.get('book_id')
+        if not book_id:
+            flash("你还没有选择要购买的书!",category='info')
+            print('你还没有选择要购买的书！')
+            return redirect(url_for('buybook'))
+        else:
+            book = Book.query.filter_by(id=book_id).first()
+            book_num = book.count
+            if book_num > int(num):
+                book.count -= int(num)
+                db.session.commit()
+                flash("购买成功!",category='info')
+                print('购买成功！')
+                return redirect(url_for('buybook',book_id=book_id))
+            else:
+                flash("库存不足,请联系管理员!",category='info')
+                print('库存不足,请联系管理员!')
+                return redirect(url_for('buybook', book_id=book_id))
+    return redirect(url_for('buybook'))
 
 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -23,12 +73,17 @@ def login():
         username = form.username.data
         password = form.password.data
         user = User.query.filter_by(username=username).first()  # 判断用户是否才存在
-        if user and password == user.password:
-            # session['username'] = username
-            print(user.password)
-            print(user, password)
-            login_user(user, remember=form.remember.data)
-            return redirect(url_for('home'))
+        if user:
+            if password == user.password:
+                # session['username'] = username
+                print(user.password)
+                print(user, password)
+                login_user(user, remember=form.remember.data)
+                return redirect(url_for('home'))
+            else:
+                flash('用户名或密码错误!',category='info')
+        else:
+            flash("登录的用户不存在!",category='info')
     return render_template('login.html', form=form)
 
 
@@ -71,13 +126,15 @@ def retrieve_password():
     return render_template('retrieve_password.html', form=form)
 
 
-@app.route('/admin/')
-def admin():
-    print(request.endpoint)
-    return render_template('admin.html')
+# @app.route('/admin/')
+# @login_required
+# def admin():
+#     print(request.endpoint)
+#     return render_template('admin.html')
 
 
 @app.route('/admin/select_book/<int:page>', methods=['GET', 'POST'])
+@login_required
 def select_book(page):
     if not page or page < 1:
         page = 1
@@ -135,29 +192,35 @@ def select_book(page):
                     flash("书籍修改失败，请重试!", category='info')
                     # return render_template('select_book.html', alter_form=alter_form, table_page=table_paginate)
             else:
-                flash("要修改的书籍不存在！",category="info")
+                flash("要修改的书籍不存在！", category="info")
         else:
             flash("请确认要修改的信息！")
         return render_template('select_book.html', alter_form=alter_form, table_page=table_paginate)
     if remove_form.validate_on_submit():
         print('测试删除3')
         id = remove_form.id.data
-        book = Book.query.filter_by(id=id).first()
-        if book:
-            Book.query.filter_by(id=id).delete()
-            db.session.commit()
-            flash("删除成功！",category='info')
-            # return redirect(url_for('select_book',page=page))
+        if not remove_form.bool.data:
+            flash("请确认要删除的信息！", category='info')
             return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
         else:
-            flash("输入的书籍编号不存在!",category='info')
-        return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
+            book = Book.query.filter_by(id=id).first()
+            if book:
+                Book.query.filter_by(id=id).delete()
+                db.session.commit()
+                flash("删除成功！", category='info')
+                # return redirect(url_for('select_book',page=page))
+                table_paginate = Book.query.order_by(Book.id).paginate(page, per_page=10, error_out=True)
+                return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
+            else:
+                flash("输入的书籍编号不存在!", category='info')
+            return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
     # print(request.endpoint)
     return render_template('select_book.html', form=form, table_page=table_paginate)
 
 
 # 浏览书籍信息路由
 @app.route('/admin/look_book/<int:page>', methods=['GET', 'POST'])
+@login_required
 def look_book(page):
     if not page or page < 1:
         page = 1
@@ -201,44 +264,8 @@ def look_book(page):
     return render_template('look_book.html', table=table, table_page=table_paginate, form=form)
 
 
-# @app.route('/admin/alterbook/<int:page>')
-# def alter_book(page):
-#     if not page or page < 1:
-#         page = 1
-#     table = Book.query.all()
-#     form = AddBookForm()
-#     # 分页器对象
-#     table_paginate = Book.query.order_by(Book.id).paginate(page, per_page=10,
-#                                                            error_out=True)  # page代表那一页。每页显示2个，超出页数显示空列表
-#     if request.method == 'POST':
-#         if form.validate_on_submit:
-#             print('debug')
-#             # 获取表单数据
-#             book_id = form.id.data
-#             book_name = form.name.data
-#             book_category = form.category.data
-#             book_author = form.author.data
-#             book_provenance = form.provenance.data
-#             book_price = form.price.data
-#             book_num = form.num.data
-#             print(book_id, book_name, book_category, book_author, book_provenance, book_price, book_num)
-#             obj_book_id = Book.query.filter_by(id=book_id).first()
-#             if obj_book_id:  # 判断书籍编号是否存在，书籍编号不可重复
-#                 if obj_book_id.name == book_name and obj_book_id.category == book_category and obj_book_id.author == book_author:
-#                     if obj_book_id.provenance == book_provenance and obj_book_id.price == book_price:
-#                         obj_book_id.count += int(book_num)
-#                         db.session.commit()
-#                         flash("添加成功！", category='info')
-#                 else:
-#                     flash("添加失败,书籍编号已存在!")
-#             else:
-#                 add_book(book_id=book_id, book_name=book_name, book_category=book_category,
-#                          book_author=book_author,
-#                          book_provenance=book_provenance, book_price=book_price, book_num=book_num)
-#     return render_template('alter_book.html', table=table, table_page=table_paginate, form=form)
-
-
 @app.route('/logout/')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('home'))
