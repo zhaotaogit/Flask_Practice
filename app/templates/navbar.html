@@ -68,8 +68,12 @@
                             <li><a href="{{ url_for('personal_center') }}">个人中心</a></li>
                             <li class="{% if request.endpoint == 'look_book' %}active{% endif %}"><a
                             href="{{ url_for('look_book',page=0) }}">新增书籍</a></li>
+                        <li class="{% if request.endpoint == 'del_book' %}active{% endif %}"><a
+                            href="{{ url_for('del_book',page=0) }}">删除书籍</a></li>
                     <li class="{% if request.endpoint == 'select_book' %}active{% endif %}"><a
                             href="{{ url_for('select_book',page=0) }}">书籍查询与修改</a></li>
+                        <li class="{% if request.endpoint == 'recording' %}active{% endif %}"><a
+                            href="{{ url_for('recording',page=0) }}">销售记录</a></li>
                         </ul>
                     <li class="{% if request.endpoint == 'logout' %}active{% endif %}"><a
                             href="{{ url_for("logout") }}">注销 <span class="sr-only">(current)</span></a></li>

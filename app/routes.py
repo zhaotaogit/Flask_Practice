@@ -2,26 +2,36 @@ from flask import render_template, flash, redirect, url_for, session, request
 
 from app import app, db
 from app.forms import RegisterForm, LoginForm, RetrievePasswordForm, SelectBookForm, AddBookForm, DelBookForm
-from app.models import User, Book
-# from app.func import add_user, search_user, is_pwd_true, search_email, add_book
+from app.models import User, Book, Recording
 from flask_login import login_user, login_required, logout_user, current_user
 
 
+# 首页视图
 @app.route('/')
 @login_required
 def home():
-    print(current_user.username)
-    # if not page or page < 1:
-    #     page = 1
-    # table_paginate = Book.query.order_by(Book.id).paginate(page, per_page=10, error_out=True)
+    # print(current_user.username)
     return render_template('index.html', name=current_user.username, title='首页')
 
+
+# 书籍销售记录视图
+@app.route('/recording/<int:page>')
+@login_required
+def recording(page):
+    if not page or page < 1:
+        page = 1
+    table_paginate = Recording.query.order_by(Recording.timer.desc()).paginate(page, per_page=10, error_out=True)
+    return render_template('recording.html',table_page=table_paginate)
+
+
+# 个人中心视图
 @app.route('/personal_center')
 @login_required
 def personal_center():
     return render_template('personal_center.html')
 
 
+# 浏览书籍信息视图
 @app.route('/bookinfo/<int:page>')
 @login_required
 def bookinfo(page):
@@ -31,6 +41,7 @@ def bookinfo(page):
     return render_template('bookinfo.html', table_page=table_paginate)
 
 
+# 购买书籍视图
 @app.route('/buybook/', methods=['GET', 'POST'])
 @login_required
 def buybook():
@@ -39,7 +50,7 @@ def buybook():
         if not book_id:
             return render_template('buybook.html')
         book = Book.query.filter_by(id=book_id).first()
-        return render_template('buybook.html',book=book)
+        return render_template('buybook.html', book=book)
     if request.method == 'POST':
         form_data = request.form.to_dict()
         num = form_data.get('num')
@@ -47,25 +58,30 @@ def buybook():
         print(num)
         book_id = form_data.get('book_id')
         if not book_id:
-            flash("你还没有选择要购买的书!",category='info')
+            flash("你还没有选择要购买的书!", category='info')
             print('你还没有选择要购买的书！')
             return redirect(url_for('buybook'))
         else:
             book = Book.query.filter_by(id=book_id).first()
             book_num = book.count
-            if book_num > int(num):
+            if book_num >= int(num):
                 book.count -= int(num)
                 db.session.commit()
-                flash("购买成功!",category='info')
+                flash("购买成功!", category='info')
                 print('购买成功！')
-                return redirect(url_for('buybook',book_id=book_id))
+                recording = Recording(name=book.name, category=book.category, author=book.author,img=book.img,
+                                      provenance=book.provenance, price=book.price, num=int(num), info="售出")
+                db.session.add(recording)
+                db.session.commit()
+                return redirect(url_for('buybook', book_id=book_id))
             else:
-                flash("库存不足,请联系管理员!",category='info')
+                flash("库存不足,请联系管理员!", category='info')
                 print('库存不足,请联系管理员!')
                 return redirect(url_for('buybook', book_id=book_id))
     return redirect(url_for('buybook'))
 
 
+# 用户登录视图
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -81,9 +97,9 @@ def login():
                 login_user(user, remember=form.remember.data)
                 return redirect(url_for('home'))
             else:
-                flash('用户名或密码错误!',category='info')
+                flash('用户名或密码错误!', category='info')
         else:
-            flash("登录的用户不存在!",category='info')
+            flash("登录的用户不存在!", category='info')
     return render_template('login.html', form=form)
 
 
@@ -156,10 +172,11 @@ def select_book(page):
         if form.operatin_select.data == 2:
             print('debug:修改操作，获取值:', form.operatin_select.data)
             return render_template('select_book.html', alter_form=alter_form, table_page=table_paginate)
-        elif form.operatin_select.data == 3:
-            print('debug:修改操作，获取值:', form.operatin_select.data)
-            remove_form = AddBookForm()
-            return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
+        # elif form.operatin_select.data == 3:
+        #     print('debug:修改操作，获取值:', form.operatin_select.data)
+        #     remove_form = AddBookForm()
+        #     return redirect(url_for('del_book', page=0))
+        # return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
     # 修改书籍信息
     if alter_form.validate_on_submit():
         print('debug:测试点击2')
@@ -196,26 +213,24 @@ def select_book(page):
         else:
             flash("请确认要修改的信息！")
         return render_template('select_book.html', alter_form=alter_form, table_page=table_paginate)
-    if remove_form.validate_on_submit():
-        print('测试删除3')
-        id = remove_form.id.data
-        if not remove_form.bool.data:
-            flash("请确认要删除的信息！", category='info')
-            return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
-        else:
-            book = Book.query.filter_by(id=id).first()
-            if book:
-                Book.query.filter_by(id=id).delete()
-                db.session.commit()
-                flash("删除成功！", category='info')
-                # return redirect(url_for('select_book',page=page))
-                table_paginate = Book.query.order_by(Book.id).paginate(page, per_page=10, error_out=True)
-                return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
-            else:
-                flash("输入的书籍编号不存在!", category='info')
-            return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
-    # print(request.endpoint)
     return render_template('select_book.html', form=form, table_page=table_paginate)
+
+
+@app.route('/del_book/<int:page>')
+def del_book(page):
+    remove_form = DelBookForm()
+    if not page or page < 1:
+        page = 1
+    # if
+    table_paginate = Book.query.order_by(Book.id).paginate(page, per_page=10, error_out=True)
+    return render_template('del_book.html', table_page=table_paginate, remove_form=remove_form, page=page)
+
+
+@app.route('/del_book/del_id/<int:id>')
+def delete_book(id):
+    Book.query.filter_by(id=id).delete()
+    db.session.commit()
+    return redirect(url_for('del_book', page=0))
 
 
 # 浏览书籍信息路由

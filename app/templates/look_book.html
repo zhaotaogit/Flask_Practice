@@ -9,31 +9,37 @@
             <br>
             <div class="panel panel-default">
                 <!-- Default panel contents -->
-                <div class="panel-heading">书籍信息</div>
+                <div class="panel-heading">&nbsp;&nbsp;&nbsp;&nbsp;书籍信息</div>
                 <!-- Table -->
                 <table class="table table-striped">
-                    <th>
-                    <td>书籍编号</td>
-                    <td>书名</td>
-                    <td>类别</td>
-                    <td>作者</td>
-                    <td>出版社</td>
-                    <td>价格</td>
-                    <td>库存量</td>
-                    </th>
-                    <tr>
-                        {% for i in table_page.items %}
-                            <td></td>
-                            <td>{{ i.id }}</td>
-                            <td>《{{ i.name }}》</td>
-                            <td>{{ i.category }}</td>
-                            <td>{{ i.author }}</td>
-                            <td>{{ i.provenance }}</td>
-                            <td>¥{{ i.price }}元/本</td>
-                            <td>{{ i. count }}本</td>
+                            <tr>
+                            <td style="vertical-align:middle;text-align:center;">书籍编号</td>
+                            <td style="vertical-align:middle;text-align:center;">书籍封面</td>
+                            <td style="vertical-align:middle;text-align:center;">书名</td>
+                            <td style="vertical-align:middle;text-align:center;">类别</td>
+                            <td style="vertical-align:middle;text-align:center;">作者</td>
+                            <td style="vertical-align:middle;text-align:center;">出版社</td>
+                            <td style="vertical-align:middle;text-align:center;">价格</td>
+                            <td style="vertical-align:middle;text-align:center;">库存量</td>
+                            <td style="vertical-align:middle;text-align:center;">操作</td>
                             </tr>
-                        {% endfor %}
-                </table>
+                            <tr>
+                                {% for i in table_page.items %}
+                                    <td style="vertical-align:middle;text-align:center;">{{ i.id }}</td>
+                                    <td style="vertical-align:middle;text-align:center;">
+                                        <img class="initiator-avatar"
+                                             src="{{ url_for('static', filename = 'book_img/'+i.img,_external=True) }}"
+                                             alt="{{ i.name }}" height="50"></td>
+                                    <td style="vertical-align:middle;text-align:center;">《{{ i.name }}》</td>
+                                    <td style="vertical-align:middle;text-align:center;">{{ i.category }}</td>
+                                    <td style="vertical-align:middle;text-align:center;">{{ i.author }}</td>
+                                    <td style="vertical-align:middle;text-align:center;">{{ i.provenance }}</td>
+                                    <td style="vertical-align:middle;text-align:center;">¥{{ i.price }}元/本</td>
+                                    <td style="vertical-align:middle;text-align:center;">{{ i. count }}本</td>
+                                    <td style="vertical-align:middle;text-align:center;"><a class="btn btn-info" href="{{ url_for('buybook', book_id=i.id) }}"role="button">购买</a></td>
+                                    </tr>
+                                {% endfor %}
+                        </table>
             </div>
             {#        {#书籍分页效果#}
             <nav aria-label="Page navigation">
