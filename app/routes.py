@@ -1,9 +1,13 @@
 from flask import render_template, flash, redirect, url_for, session, request
 
 from app import app, db
-from app.forms import RegisterForm, LoginForm, RetrievePasswordForm, SelectBookForm, AddBookForm, DelBookForm
+from app.forms import RegisterForm, LoginForm, RetrievePasswordForm, SelectBookForm, AddBookForm, DelBookForm, \
+    RetrievePasswordSubForm, ResetPasswordForm
 from app.models import User, Book, Recording
+from app.func import send_mail
 from flask_login import login_user, login_required, logout_user, current_user
+
+dit = {}
 
 
 # 首页视图
@@ -21,7 +25,7 @@ def recording(page):
     if not page or page < 1:
         page = 1
     table_paginate = Recording.query.order_by(Recording.timer.desc()).paginate(page, per_page=10, error_out=True)
-    return render_template('recording.html',table_page=table_paginate)
+    return render_template('recording.html', table_page=table_paginate)
 
 
 # 个人中心视图
@@ -67,9 +71,9 @@ def buybook():
             if book_num >= int(num):
                 book.count -= int(num)
                 db.session.commit()
-                flash("购买成功!", category='info')
+                flash(f"购买成功,共花费:{int(num)*book.price}元!", category='info')
                 print('购买成功！')
-                recording = Recording(name=book.name, category=book.category, author=book.author,img=book.img,
+                recording = Recording(name=book.name, category=book.category, author=book.author, img=book.img,
                                       provenance=book.provenance, price=book.price, num=int(num), info="售出")
                 db.session.add(recording)
                 db.session.commit()
@@ -132,15 +136,76 @@ def register():
 @app.route('/retrieve_password/', methods=['GET', 'POST'])
 def retrieve_password():
     form = RetrievePasswordForm()
+    form_sub = RetrievePasswordSubForm()
     if form.validate_on_submit():
+        print('123')
         email = form.email.data
         user = User.query.filter_by(email=email).first()
+        print(email)
         if user:
-            pass
+            flag, code = send_mail(email)
+            print(flag)
+            if flag:
+                flash('验证码发送成功，请前往邮箱查看!', category='info')
+                form.email.data = email
+                dit[email] = code
+                return redirect(url_for('retrievepasswordsub', email=email))
+            else:
+                flash("验证码发送失败!", category='info')
+                return redirect(url_for('retrieve_password'))
         else:
-            flash("邮箱不存在!", category='info')
-    return render_template('retrieve_password.html', form=form)
+            flash("输入的邮箱不存在!", category='info')
+            return redirect(url_for('retrieve_password'))
+    if form_sub.validate_on_submit():
+        return redirect(url_for('retrieve_password'))
+    return render_template('retrieve_password.html', form=form, form_sub=form_sub)
 
+
+@app.route('/send_email/<string:email>')
+def send_email(email):
+    flag, code = send_mail(email)
+    print(flag)
+    if flag:
+        flash('验证码发送成功，请前往邮箱查看!', category='info')
+        dit[email] = code
+        return redirect(url_for('retrievepasswordsub', email=email))
+    else:
+        flash("验证码发送失败!", category='info')
+        return redirect(url_for('retrieve_password'))
+
+@app.route('/retrievepasswordsub/<string:email>', methods=['GET', 'POST'])
+def retrievepasswordsub(email):
+    form = RetrievePasswordForm()
+    form.email.data = email
+    if form.validate_on_submit():
+        print(dit)
+        code = dit[email]
+        print(code)
+        vcode = form.verification_code.data
+        print(vcode)
+        user = User.query.filter_by(email=email).first()
+        # print(code, vcode)
+        # print(type(code),type(vcode))
+        # print(code == vcode)
+        if str(code) == vcode:
+            return redirect(url_for('reset_password', username=user.username))
+        else:
+            flash("验证码错误！", category='info')
+            return redirect(url_for('retrievepasswordsub', email=email))
+    return render_template('retrievepasswordsub.html', form=form,email=email)
+
+
+@app.route('/reset_password/<string:username>',methods=['GET','POST'])
+def reset_password(username):
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        newpassword = form.password.data
+        user = User.query.filter_by(username=username).first()
+        user.password = newpassword
+        db.session.commit()
+        flash('密码修改成功!', category='info')
+        return redirect(url_for('reset_password',username=username))
+    return render_template('reset_password.html',form=form)
 
 # @app.route('/admin/')
 # @login_required

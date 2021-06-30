@@ -19,11 +19,22 @@ class LoginForm(FlaskForm):
 
 
 class RetrievePasswordForm(FlaskForm):
-    email = StringField('请输入账号绑定的邮箱:', validators=[DataRequired()])
-    # verification_code = StringField('验证码',validators=[DataRequired()])
-    # send_code = SubmitField('发送验证码')
+    email = StringField('绑定的邮箱', validators=[DataRequired()])
+    verification_code = StringField('验证码')
+    send_code = SubmitField('发送验证码')
     submit = SubmitField('确定')
 
+
+class RetrievePasswordSubForm(FlaskForm):
+    email = StringField('绑定的邮箱', validators=[DataRequired()])
+    verification_code = StringField('验证码')
+    send_code = SubmitField('发送验证码')
+    submit = SubmitField('确定')
+
+
+class ResetPasswordForm(FlaskForm):
+    password = StringField('新密码')
+    submit = SubmitField('确定')
 
 class SelectBookForm(FlaskForm):
     operatin_select = SelectField(
@@ -70,5 +81,3 @@ class DelBookForm(FlaskForm):
     id = StringField("书籍编号", validators=[DataRequired()])
     bool = BooleanField("已确认")
     submit = SubmitField('确定')
-
-
