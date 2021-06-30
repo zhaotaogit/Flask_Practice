@@ -21,7 +21,6 @@
                             <td style="vertical-align:middle;text-align:center;">出版社</td>
                             <td style="vertical-align:middle;text-align:center;">价格</td>
                             <td style="vertical-align:middle;text-align:center;">库存量</td>
-                            <td style="vertical-align:middle;text-align:center;">操作</td>
                             </tr>
                             <tr>
                                 {% for i in table_page.items %}
@@ -36,7 +35,6 @@
                                     <td style="vertical-align:middle;text-align:center;">{{ i.provenance }}</td>
                                     <td style="vertical-align:middle;text-align:center;">¥{{ i.price }}元/本</td>
                                     <td style="vertical-align:middle;text-align:center;">{{ i. count }}本</td>
-                                    <td style="vertical-align:middle;text-align:center;"><a class="btn btn-info" href="{{ url_for('buybook', book_id=i.id) }}"role="button">购买</a></td>
                                     </tr>
                                 {% endfor %}
                         </table>
@@ -90,16 +88,6 @@
                         {{ wtf.form_field(form.provenance) }}
                         {{ wtf.form_field(form.submit) }}
                     </div>
-                    {#            {{ form.id.label }}{{ form.id(class="form-control") }}#}
-                    {#            {{ form.name.label }}{{ form.name(class="form-control") }}#}
-                    {#            {{ form.category.label }}{{ form.name(class="form-control") }}#}
-                    {#            {{ form.provenance.label }}{{ form.category(class="form-control") }}#}
-                    {#
-{#                {{ wtf.form_field(form.id) }}#}
-                    {#                {{ wtf.form_field(form.name) }}#}
-                    {#                {{ wtf.form_field(form.category) }}#}
-                    {#            <div class="col-md-1">#}
-                    {#            </div>#}
                     <div class="col-md-1"></div>
                     <div class="col-md-5">
                         {{ wtf.form_field(form.author) }}
@@ -112,14 +100,6 @@
                 {% endfor %}
             </div>
         </form>
-        {#            {{ form.author.label }}{{ form.author(class="form-control") }}#}
-        {#            {{ form.price.label }}{{ form.price(class="form-control") }}#}
-        {#            {{ form.num.label }}{{ form.num(class="form-control") }}#}
-        {#            {{ wtf.form_field(form.author) }}#}
-        {#            {{ wtf.form_field(form.price) }}#}
-        {#            {{ wtf.form_field(form.num) }}#}
-
-
     </div>
     </div>
 {% endblock %}

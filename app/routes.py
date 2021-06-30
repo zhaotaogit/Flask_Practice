@@ -237,46 +237,37 @@ def select_book(page):
         if form.operatin_select.data == 2:
             print('debug:修改操作，获取值:', form.operatin_select.data)
             return render_template('select_book.html', alter_form=alter_form, table_page=table_paginate)
-        # elif form.operatin_select.data == 3:
-        #     print('debug:修改操作，获取值:', form.operatin_select.data)
-        #     remove_form = AddBookForm()
-        #     return redirect(url_for('del_book', page=0))
-        # return render_template('select_book.html', remove_form=remove_form, table_page=table_paginate)
     # 修改书籍信息
     if alter_form.validate_on_submit():
         print('debug:测试点击2')
         print(alter_form.bool.data)
-        if alter_form.bool.data:
-            book_id = alter_form.id.data
-            book_name = alter_form.name.data
-            book_category = alter_form.category.data
-            book_author = alter_form.author.data
-            book_provenance = alter_form.provenance.data
-            book_price = alter_form.price.data
-            book_num = alter_form.num.data
-            # 判断要修改的书籍是否存在
-            book = Book.query.filter_by(id=book_id).first()
-            if book:
-                try:
-                    book.name = book_name
-                    book.category = book_category
-                    book.author = book_author
-                    book.provenance = book_provenance
-                    book.price = book_price
-                    book.count = book_num
-                    db.session.commit()
-                    flash('书籍修改成功！', category='info')
-                    print('修改成功')
-                except Exception as e:
-                    db.session.rollback()
-                    print(e)
-                    print('修改失败！')
-                    flash("书籍修改失败，请重试!", category='info')
-                    # return render_template('select_book.html', alter_form=alter_form, table_page=table_paginate)
-            else:
-                flash("要修改的书籍不存在！", category="info")
+        book_id = alter_form.id.data
+        book_name = alter_form.name.data
+        book_category = alter_form.category.data
+        book_author = alter_form.author.data
+        book_provenance = alter_form.provenance.data
+        book_price = alter_form.price.data
+        book_num = alter_form.num.data
+        # 判断要修改的书籍是否存在
+        book = Book.query.filter_by(id=book_id).first()
+        if book:
+            try:
+                book.name = book_name
+                book.category = book_category
+                book.author = book_author
+                book.provenance = book_provenance
+                book.price = book_price
+                book.count = book_num
+                db.session.commit()
+                flash('书籍修改成功！', category='info')
+                print('修改成功')
+            except Exception as e:
+                db.session.rollback()
+                print(e)
+                print('修改失败！')
+                flash("书籍修改失败，请重试!", category='info')
         else:
-            flash("请确认要修改的信息！")
+            flash("要修改的书籍不存在！", category="info")
         return render_template('select_book.html', alter_form=alter_form, table_page=table_paginate)
     return render_template('select_book.html', form=form, table_page=table_paginate)
 

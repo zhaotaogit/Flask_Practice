@@ -43,7 +43,7 @@ class SelectBookForm(FlaskForm):
         render_kw={
             'class': 'form-control'
         },
-        choices=[(1, '查询'), (2, '修改'), (3, '删除')],
+        choices=[(1, '查询'), (2, '修改')],
         default=1,
         coerce=int
     )
